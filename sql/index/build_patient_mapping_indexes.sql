@@ -1,0 +1,46 @@
+/*
+ * Adds indexes to the patient and encounter lookup tables
+ * Copyright (c) 2014-2017 Weill Cornell Medical College
+ */
+use <prefix>i2b2demodata;
+
+IF NOT EXISTS (
+		SELECT *
+		FROM sys.indexes
+		WHERE object_id = object_id('PATIENT_MAPPING')
+			AND NAME = 'IDX_PATIENT_KEY'
+		)
+BEGIN
+	CREATE INDEX IDX_PATIENT_KEY ON PATIENT_MAPPING (
+		PATIENT_IDE
+		, PATIENT_NUM) 
+	include ( SOURCESYSTEM_CD
+		, PATIENT_IDE_SOURCE
+		, PROJECT_ID
+		)
+END
+
+IF NOT EXISTS (
+		SELECT *
+		FROM sys.indexes
+		WHERE NAME = 'IDX_SSCD'
+			AND object_id = OBJECT_ID('PATIENT_MAPPING')
+		)
+BEGIN
+	CREATE NONCLUSTERED INDEX IDX_SSCD ON [dbo].[PATIENT_MAPPING] ([SOURCESYSTEM_CD])
+INCLUDE ([PATIENT_NUM],[PATIENT_IDE]);
+END
+
+/*
+ * Enhances specimen facts
+ */
+IF NOT EXISTS (
+		SELECT *
+		FROM sys.indexes
+		WHERE NAME = 'IDX_PAT_SSCD'
+			AND object_id = OBJECT_ID('PATIENT_MAPPING')
+		)
+BEGIN
+CREATE NONCLUSTERED INDEX IDX_PAT_SSCD
+ON [dbo].[PATIENT_MAPPING] ([PATIENT_NUM],[SOURCESYSTEM_CD])
+END
