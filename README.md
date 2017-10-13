@@ -4,9 +4,12 @@ README
 This directory contains the distribution files of SUPER, a pipeline for extracting data from multiple
 EHRs and importing it for use within i2b2. i2b2 is a self-service cohort discovery tool that matches
 clinical investigators with patient cohorts of interest. i2b2 has the ability to support projects with
-specialized cohorts for different parties. SUPER supports the SOFA approach - a way of maintaining and
-creating new i2b2 projects easily using views. This version of SUPER cannot be run.
+specialized cohorts for different parties. SUPER supports SOFA (Single Observation Fact Approach) 
+- a way of maintaining and creating new i2b2 projects easily using views based off of one fact table. 
+This version of SUPER cannot be run.
 
+In the SOFA paper, we referred to different projects as "base" and "prefix". In our code, all references to
+the heron database is called <base> and specific project databases as <child>.
 
 Directories
 -----------
@@ -39,6 +42,10 @@ constants.py file that defines variables for use:
 		program_name
 		server_addr
 
+The program SUPER was based off of the approach taken by KUMC. More information about KUMC's approach to populating
+Oracle databases using paver can be found on their website: 
+
+https://informatics.kumc.edu/work/browser/heron_load?order=name
 
 
 Version History

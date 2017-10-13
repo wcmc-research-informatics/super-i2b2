@@ -1,11 +1,9 @@
 #!/usr/bin/python
 '''
-Original build on Jun 29, 2015
-
-@author: mzd2016
-
-A smaller version of big red, restricted to 50,000 patients. This is to 
-expedite regression testing.
+    This python file demonstrates the dependencies that must be met to
+	populate a parent i2b2 project with data from multiple EHR systems.
+	Makes extensive use of the paver package within Python to specify
+	SQL file dependencies and their order
 '''
 
 from db_utils import run_scripts, finalize
@@ -15,12 +13,12 @@ from paver.easy import task, needs, no_help
 '''The main methods which drive the ETL'''
 @task
 @needs([
-  'bigred.mapping_refresh'
-  ,'bigred.miscellaneous_entries'
-  ,'bigred.metadata'
-  ,'bigred.dimension'
-  ,'bigred.demodata'
-  ,'bigred.finalize_etl'
+  'parent.mapping_refresh'
+  ,'parent.miscellaneous_entries'
+  ,'parent.metadata'
+  ,'parent.dimension'
+  ,'parent.demodata'
+  ,'parent.finalize_etl'
 ])
 def etl():
   ''' Full ETL '''
@@ -29,11 +27,11 @@ def etl():
 
 @task
 @needs([ 
-  'bigred.mapping_refresh'
-  ,'bigred.miscellaneous_entries'
-  ,'bigred.dimension'
-  ,'bigred.demodata'
-  ,'bigred.finalize_etl'
+  'parent.mapping_refresh'
+  ,'parent.miscellaneous_entries'
+  ,'parent.dimension'
+  ,'parent.demodata'
+  ,'parent.finalize_etl'
 ])
 def etl_refresh():
   ''' ETL that skips metadata '''
@@ -42,12 +40,12 @@ def etl_refresh():
 
 @task
 @needs([
-  'bigred.truncate_mapping'
-  ,'bigred.miscellaneous_entries'
-  ,'bigred.metadata'
-  ,'bigred.dimension'
-  ,'bigred.demodata'
-  ,'bigred.finalize_etl'
+  'parent.truncate_mapping'
+  ,'parent.miscellaneous_entries'
+  ,'parent.metadata'
+  ,'parent.dimension'
+  ,'parent.demodata'
+  ,'parent.finalize_etl'
 ])
 def unit_test():
   ''' ETL that skips mapping '''
@@ -59,11 +57,11 @@ def unit_test():
 '''2nd level functions'''
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.drop_indexes_patient_mapping'
-  ,'bigred.truncate_mapping'
-  ,'bigred.patient_mapping'
-  ,'bigred.encounter_mapping'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.drop_indexes_patient_mapping'
+  ,'parent.truncate_mapping'
+  ,'parent.patient_mapping'
+  ,'parent.encounter_mapping'
 ])
 def mapping_refresh():
   '''refresh mapping entries'''
@@ -71,9 +69,9 @@ def mapping_refresh():
 
 @task
 @needs([
-  'bigred.truncate_misc'
-  ,'bigred.blacklists_refresh'
-  ,'bigred.redcap_preprocessing'
+  'parent.truncate_misc'
+  ,'parent.blacklists_refresh'
+  ,'parent.redcap_preprocessing'
 ])
 @run_scripts(
   'heron'
@@ -92,11 +90,11 @@ def miscellaneous_entries():
 
 @task
 @needs([
-  'bigred.drop_indexes_metadata'
-  ,'bigred.truncate_metadata'
-  ,'bigred.metadata_epic'
-  ,'bigred.metadata_other'
-  ,'bigred.build_indexes_metadata'
+  'parent.drop_indexes_metadata'
+  ,'parent.truncate_metadata'
+  ,'parent.metadata_epic'
+  ,'parent.metadata_other'
+  ,'parent.build_indexes_metadata'
 ])
 def metadata():
   '''refresh all metadata'''
@@ -104,11 +102,11 @@ def metadata():
 
 @task
 @needs([
-  'bigred.drop_indexes_dimension'
-  ,'bigred.truncate_dimension'
-  ,'bigred.build_dimension_entries_standard'
-  ,'bigred.build_dimension_entries_other'
-  ,'bigred.build_indexes_dimension'
+  'parent.drop_indexes_dimension'
+  ,'parent.truncate_dimension'
+  ,'parent.build_dimension_entries_standard'
+  ,'parent.build_dimension_entries_other'
+  ,'parent.build_indexes_dimension'
 ])
 def dimension():
   '''refresh all dimension data'''
@@ -116,11 +114,11 @@ def dimension():
 
 @task
 @needs([
-  'bigred.drop_indexes_fact'
-  ,'bigred.truncate_fact'
-  ,'bigred.observation_fact_epic'
-  ,'bigred.observation_fact_other'
-  ,'bigred.build_indexes_fact'
+  'parent.drop_indexes_fact'
+  ,'parent.truncate_fact'
+  ,'parent.observation_fact_epic'
+  ,'parent.observation_fact_other'
+  ,'parent.build_indexes_fact'
 ])
 def demodata():
   '''refresh all observation_fact data'''
@@ -128,9 +126,9 @@ def demodata():
 
 @task
 @needs([
-  'bigred.redcap_cleanup'
-  ,'bigred.create_datamart_report'
-  #,'bigred.counting'
+  'parent.redcap_cleanup'
+  ,'parent.create_datamart_report'
+  #,'parent.counting'
   ])
 def finalize_etl():
   '''Scripts to be run when finalizing the ETL'''
@@ -165,13 +163,13 @@ def patient_mapping():
 
 @task
 @needs([
-  'bigred.crest_encounter_mapping'
-  ,'bigred.ormanager_encounter_mapping'
-  ,'bigred.redcap_encounter_mapping'
-  ,'bigred.compurecord_encounter_mapping'
-  ,'bigred.eclipsys_encounter_mapping'
-  ,'bigred.eagle_encounter_mapping'
-  ,'bigred.tumor_registry_encounter_mapping'
+  'parent.crest_encounter_mapping'
+  ,'parent.ormanager_encounter_mapping'
+  ,'parent.redcap_encounter_mapping'
+  ,'parent.compurecord_encounter_mapping'
+  ,'parent.eclipsys_encounter_mapping'
+  ,'parent.eagle_encounter_mapping'
+  ,'parent.tumor_registry_encounter_mapping'
 ])
 @run_scripts(
   'heron'
@@ -238,15 +236,15 @@ def metadata_epic():
 
 @task
 @needs([
-   'bigred.crest_metadata'
-  ,'bigred.ormanager_metadata'
-  ,'bigred.profiler_metadata'
-  ,'bigred.redcap_metadata'
-  ,'bigred.compurecord_metadata'
-  ,'bigred.eclipsys_metadata'
-  ,'bigred.eagle_metadata'
-  ,'bigred.tumor_registry_metadata'
-  ,'bigred.custom_ontology_review'
+   'parent.crest_metadata'
+  ,'parent.ormanager_metadata'
+  ,'parent.profiler_metadata'
+  ,'parent.redcap_metadata'
+  ,'parent.compurecord_metadata'
+  ,'parent.eclipsys_metadata'
+  ,'parent.eagle_metadata'
+  ,'parent.tumor_registry_metadata'
+  ,'parent.custom_ontology_review'
 ])
 def metadata_other():
   pass
@@ -290,14 +288,14 @@ def build_dimension_entries_standard():
 
 @task
 @needs([
-  'bigred.crest_dimension'
-  ,'bigred.ormanager_dimension'
-  ,'bigred.profiler_dimension'
-  ,'bigred.redcap_dimension'
-  ,'bigred.compurecord_dimension'
-  ,'bigred.eclipsys_dimension'
-  ,'bigred.eagle_dimension'
-  ,'bigred.tumor_registry_dimension'
+  'parent.crest_dimension'
+  ,'parent.ormanager_dimension'
+  ,'parent.profiler_dimension'
+  ,'parent.redcap_dimension'
+  ,'parent.compurecord_dimension'
+  ,'parent.eclipsys_dimension'
+  ,'parent.eagle_dimension'
+  ,'parent.tumor_registry_dimension'
 ])
 def build_dimension_entries_other():
   '''builds dimension entries for other source systems'''
@@ -359,14 +357,14 @@ def observation_fact_epic():
 
 @task
 @needs([
-  'bigred.crest_demodata'
-  ,'bigred.ormanager_demodata'
-  ,'bigred.profiler_demodata'
-  ,'bigred.redcap_demodata'
-  ,'bigred.compurecord_demodata'
-  ,'bigred.eclipsys_demodata'
-  ,'bigred.eagle_demodata'
-  ,'bigred.tumor_registry_demodata'
+  'parent.crest_demodata'
+  ,'parent.ormanager_demodata'
+  ,'parent.profiler_demodata'
+  ,'parent.redcap_demodata'
+  ,'parent.compurecord_demodata'
+  ,'parent.eclipsys_demodata'
+  ,'parent.eagle_demodata'
+  ,'parent.tumor_registry_demodata'
 ])
 def observation_fact_other():
   pass
@@ -421,13 +419,13 @@ def crest_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.crest_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.crest_truncate'
-  ,'bigred.crest_metadata'
-  ,'bigred.crest_dimension'
-  ,'bigred.crest_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.crest_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.crest_truncate'
+  ,'parent.crest_metadata'
+  ,'parent.crest_dimension'
+  ,'parent.crest_demodata'
 ])
 def crest_refresh():
   pass
@@ -471,13 +469,13 @@ def ormanager_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.ormanager_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.ormanager_truncate'
-  ,'bigred.ormanager_metadata'
-  ,'bigred.ormanager_dimension'
-  ,'bigred.ormanager_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.ormanager_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.ormanager_truncate'
+  ,'parent.ormanager_metadata'
+  ,'parent.ormanager_dimension'
+  ,'parent.ormanager_demodata'
 ])
 def ormanager_refresh():
   ''' Populates mapping dimension and fact tables with data from ORManager '''
@@ -517,11 +515,11 @@ def profiler_demodata():
 
 @task
 @needs([
-  'bigred.profiler_truncate'
-  ,'bigred.profiler_preprocess'
-  ,'bigred.profiler_metadata'
-  ,'bigred.profiler_dimension'
-  ,'bigred.profiler_demodata'
+  'parent.profiler_truncate'
+  ,'parent.profiler_preprocess'
+  ,'parent.profiler_metadata'
+  ,'parent.profiler_dimension'
+  ,'parent.profiler_demodata'
 ])
 def profiler_refresh():
   pass
@@ -576,15 +574,15 @@ def redcap_cleanup():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.redcap_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.redcap_truncate'
-  ,'bigred.redcap_preprocessing'
-  ,'bigred.redcap_metadata'
-  ,'bigred.redcap_dimension'
-  ,'bigred.redcap_demodata'
-  ,'bigred.redcap_cleanup'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.redcap_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.redcap_truncate'
+  ,'parent.redcap_preprocessing'
+  ,'parent.redcap_metadata'
+  ,'parent.redcap_dimension'
+  ,'parent.redcap_demodata'
+  ,'parent.redcap_cleanup'
 ])
 def redcap_refresh():
   ''' Imports data from REDCap Case Report Forms into i2b2 in a relational format '''
@@ -630,13 +628,13 @@ def compurecord_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.compurecord_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.compurecord_truncate'
-  ,'bigred.compurecord_metadata'
-  ,'bigred.compurecord_dimension'
-  ,'bigred.compurecord_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.compurecord_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.compurecord_truncate'
+  ,'parent.compurecord_metadata'
+  ,'parent.compurecord_dimension'
+  ,'parent.compurecord_demodata'
 ])
 def compurecord_refresh():
   ''' CompuRecord has no patient_dimension entries because all patients in CR also exist in EPIC '''
@@ -681,13 +679,13 @@ def eclipsys_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.eclipsys_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.eclipsys_truncate'
-  ,'bigred.eclipsys_metadata'
-  ,'bigred.eclipsys_dimension'
-  ,'bigred.eclipsys_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.eclipsys_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.eclipsys_truncate'
+  ,'parent.eclipsys_metadata'
+  ,'parent.eclipsys_dimension'
+  ,'parent.eclipsys_demodata'
 ])
 def eclipsys_refresh():
   pass
@@ -741,13 +739,13 @@ def eagle_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.eagle_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.eagle_truncate'
-  ,'bigred.eagle_metadata'
-  ,'bigred.eagle_dimension'
-  ,'bigred.eagle_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.eagle_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.eagle_truncate'
+  ,'parent.eagle_metadata'
+  ,'parent.eagle_dimension'
+  ,'parent.eagle_demodata'
 ])
 def eagle_refresh():
   pass
@@ -784,13 +782,13 @@ def tumor_registry_demodata():
 
 @task
 @needs([
-  'bigred.drop_indexes_encounter_mapping'
-  ,'bigred.tumor_registry_encounter_mapping'
-  ,'bigred.build_indexes_encounter_mapping'
-  ,'bigred.tumor_registry_truncate'
-  ,'bigred.tumor_registry_metadata'
-  ,'bigred.tumor_registry_dimension'
-  ,'bigred.tumor_registry_demodata'
+  'parent.drop_indexes_encounter_mapping'
+  ,'parent.tumor_registry_encounter_mapping'
+  ,'parent.build_indexes_encounter_mapping'
+  ,'parent.tumor_registry_truncate'
+  ,'parent.tumor_registry_metadata'
+  ,'parent.tumor_registry_dimension'
+  ,'parent.tumor_registry_demodata'
 ])
 def tumor_registry_refresh():
   ''' Imports data from the Tumor Registry into i2b2 in a relational format '''
@@ -819,7 +817,7 @@ def blacklists_truncate():
   pass
 
 @task
-@needs(['bigred.drop_indexes_blacklists', 'bigred.blacklists_truncate'])
+@needs(['parent.drop_indexes_blacklists', 'parent.blacklists_truncate'])
 @run_scripts('heron', 'preprocessing/create_blacklists.sql')
 def blacklists_refresh():
   pass
@@ -841,12 +839,12 @@ def counting():
 '''Index management tasks'''
 @task
 @needs([
-  'bigred.drop_indexes_dimension'
-  ,'bigred.drop_indexes_fact'
-  ,'bigred.drop_indexes_metadata'
-  ,'bigred.build_indexes_dimension'
-  ,'bigred.build_indexes_fact'
-  ,'bigred.build_indexes_metadata'
+  'parent.drop_indexes_dimension'
+  ,'parent.drop_indexes_fact'
+  ,'parent.drop_indexes_metadata'
+  ,'parent.build_indexes_dimension'
+  ,'parent.build_indexes_fact'
+  ,'parent.build_indexes_metadata'
 ])
 def refresh_indexes():
   '''Drops then rebuilds indexes for metadata, dimension, and facts'''

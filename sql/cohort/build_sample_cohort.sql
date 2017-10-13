@@ -1,3 +1,7 @@
+/* The purpose of this SQL file is to demonstrate how a cohort can be specified
+ * for an i2b2 project within the context of the S.O.F.A.
+ */
+
 use <child>i2b2demodata;
 
 
